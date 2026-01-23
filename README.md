@@ -310,7 +310,7 @@ constructor(api: IApi)
 ```typescript
 /**
  * Интерфейс ответа сервера с товарами
- * Соответствует формату ответа API магазина
+ * Соответствует формату ответа API магазина 
  */
 export interface IProductsResponse {
   total: number;      // Общее количество товаров
