@@ -8,12 +8,12 @@ export interface IApi {
 export type TPayment = 'cash' | 'card' | '';
 
 export interface IProduct {
-  id: string;           
-  description: string;  
-  image: string;        
-  title: string;        
-  category: string;     
-  price: number | null;
+    id: string;           
+    description: string;  
+    image: string;        
+    title: string;        
+   category: string;     
+    price: number | null;
 }
 
 export interface IBuyer {
@@ -31,10 +31,29 @@ export interface IBuyerValidatinErrors {
 } 
 
 export interface IProductsResponse {
-  total: number;      
-  items: IProduct[];  
+    total: number;      
+    items: IProduct[];  
 }
 
 export interface ICartItem extends IProduct {
     count: number;
+}
+
+export interface IProductsResponse {
+    total: number;    
+    items: IProduct[];  
+}
+
+export interface IOrderData {
+    payment: 'card' | 'cash';
+    email: string;
+    phone: string;
+    address: string;
+    items: string[]; 
+    total: number; 
+}
+
+export interface IOrderResponse {
+    id: string;
+    total: number;
 }

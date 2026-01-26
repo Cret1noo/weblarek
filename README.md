@@ -268,12 +268,7 @@ constructor(initialData: Partial<IBuyer> = {})
 - Проверяет валидность всех полей покупателя
 - Возвращает объект с ошибками валидации для каждого невалидного поля
 - Возвращаемое значение: `IBuyerValidationErrors` - объект с ошибками валидации
-- Пример возвращаемого значения: `{payment: 'Не выбран вид оплаты', email: 'Укажите емэйл'}`
-
-5. `validateField(field: keyof IBuyer, value: string): string | null`
-- Проверяет валидность конкретного поля покупателя
-- Параметры: `field: keyof IBuyer` - имя проверяемого поля, `value: string` - значение для проверки
-- Возвращаемое значение: `string | null` - текст ошибки или null если поле валидно
+- Пример возвращаемого значения: `{payment: 'Не выбран вид оплаты', email: 'Укажите email'}`
    
 ---
 
@@ -316,4 +311,25 @@ export interface IProductsResponse {
   total: number;      // Общее количество товаров
   items: IProduct[];  // Массив товаров
 }
+
+/**
+ * Данные для создания заказа
+ */
+export interface IOrderData {
+  payment: 'card' | 'cash'; // Способ оплаты
+  email: string;            // Электронная почта
+  phone: string;            // Телефон
+  address: string;          // Адрес доставки
+  items: string[];          // Общая сумма заказа
+  total: number;            // Массив индефикатора товара
+}
+
+/**
+ * Ответ сервера на создание заказа
+ */
+export interface IOrderResponse {
+  id: string;           // Идентификатор заказа
+  total: number;        // Общая сумма заказа
+}
+
 ```
