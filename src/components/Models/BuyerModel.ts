@@ -1,4 +1,4 @@
-import { IBuyer, IBuyerValidatinErrors } from "../../../types";
+import { IBuyer, IBuyerValidatinErrors } from "../../types";
 
 export class BuyerModel {
     private _data: IBuyer = {
@@ -8,8 +8,8 @@ export class BuyerModel {
         address: ''
     };
 
-    constructor(initialData: Partial<IBuyer> = {}) {
-        this._data = { ...this._data, ...initialData};
+    constructor() {
+        
     }
 
     saveData(data: Partial<IBuyer>): void {

@@ -1,9 +1,9 @@
 import './scss/styles.scss';
 import { Api } from './components/base/Api';
 import { ShopApi } from './components/ShopApi/ShopApi';
-import { ProductModel } from './components/base/Models/Product';
-import { CartModel } from './components/base/Models/CartModel';
-import { BuyerModel } from './components/base/Models/BuyerModel';
+import { ProductModel } from './components/Models/Product';
+import { CartModel } from './components/Models/CartModel';
+import { BuyerModel } from './components/Models/BuyerModel';
 import { apiProducts } from './utils/data';
 import { API_URL } from './utils/constants';
 
@@ -69,6 +69,12 @@ function testModels() {
     
     const buyerModel = new BuyerModel();
     
+    console.log('Тест 1: Валидация пустых данных');
+    const emptyValidation = buyerModel.validate();
+    console.log('Ошибки при пустых данных:', emptyValidation);
+    console.log('Все поля должны быть невалидны:', Object.keys(emptyValidation).length === 4);
+    
+    console.log('\nТест 2: Валидация частичных данных');
     buyerModel.saveData({
         email: 'test@example.com',
         phone: '+79991234567'
@@ -76,6 +82,12 @@ function testModels() {
     
     console.log('Данные после частичного сохранения:', buyerModel.getData());
     
+    const partialValidation = buyerModel.validate();
+    console.log('Ошибки при частичных данных:', partialValidation);
+    console.log('Должны быть ошибки payment и address:', 
+        partialValidation.payment && partialValidation.address);
+    
+    console.log('\nТест 3: Валидация полных данных');
     buyerModel.saveData({
         address: 'Москва, ул. Примерная, д. 1',
         payment: 'card'
@@ -83,12 +95,18 @@ function testModels() {
     
     console.log('Данные после полного сохранения:', buyerModel.getData());
     
-    const validationResult = buyerModel.validate();
-    console.log('Результат валидации:', validationResult);
-    console.log('Валидны все поля?', Object.keys(validationResult).length === 0);
+    const fullValidation = buyerModel.validate();
+    console.log('Ошибки при полных данных:', fullValidation);
+    console.log('Все поля должны быть валидны:', Object.keys(fullValidation).length === 0);
     
+    // Тест 4: Очистка и повторная валидация
+    console.log('\nТест 4: Валидация после очистки');
     buyerModel.clear();
     console.log('Данные после очистки:', buyerModel.getData());
+    
+    const afterClearValidation = buyerModel.validate();
+    console.log('Ошибки после очистки:', afterClearValidation);
+    console.log('Снова все поля невалидны:', Object.keys(afterClearValidation).length === 4);
     
     console.log('\n=== Тестирование завершено ===');
 }
