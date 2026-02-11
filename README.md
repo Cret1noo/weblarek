@@ -333,3 +333,233 @@ export interface IOrderResponse {
 }
 
 ```
+
+# Web-ларёк. Документация слоя View
+
+## Базовый компонент
+
+### Component<T>
+Абстрактный базовый класс для всех компонентов представления.
+
+**Поля:**
+- `container: HTMLElement` — корневой элемент компонента
+
+**Методы:**
+- `render(data?: Partial<T>): HTMLElement` — возвращает корневой элемент, опционально обновляет данные
+- `setImage(element: HTMLImageElement, src: string, alt?: string): void` — устанавливает изображение с CDN_URL
+
+---
+
+## Модальное окно
+
+### ModalData
+- `content: HTMLElement | HTMLElement[]` — контент внутри модалки
+
+### Modal
+Наследуется от `Component<ModalData>`
+
+**Поля:**
+- `closeButton: HTMLButtonElement` — кнопка закрытия
+- `contentEl: HTMLElement` — контейнер для контента
+
+**Методы:**
+- `set content(data: HTMLElement)` — устанавливает контент
+- `open()` — открывает модалку (добавляет класс `modal_active`)
+- `close()` — закрывает модалку (удаляет класс `modal_active`)
+
+**События:**
+- `modal:open`
+- `modal:close`
+
+---
+
+## Шапка
+
+### HeaderData
+- `counter: number` — количество товаров в корзине
+
+### Header
+Наследуется от `Component<HeaderData>`
+
+**Поля:**
+- `basketButton: HTMLButtonElement` — кнопка открытия корзины
+- `countElement: HTMLElement` — элемент счётчика
+
+**Методы:**
+- `set counter(value: number)` — обновляет счётчик
+
+**События:**
+- `basket:open` — клик по иконке корзины
+
+---
+
+## Корзина
+
+### BasketData
+- `price: number` — общая стоимость
+- `content: HTMLElement` — список товаров
+
+### Basket
+Наследуется от `Component<BasketData>`
+
+**Поля:**
+- `contentEl: HTMLElement` — контейнер списка товаров
+- `priceEl: HTMLElement` — элемент общей суммы
+- `basketButton: HTMLButtonElement` — кнопка оформления
+
+**Методы:**
+- `set price(value: number)` — обновляет сумму
+- `set content(items: HTMLElement[])` — отрисовывает список товаров
+
+**События:**
+- `basket:checkout` — клик по кнопке «Оформить»
+
+---
+
+## Каталог
+
+### GalleryData
+- `catalog: HTMLElement[]` — массив карточек товаров
+
+### Gallery / Catalog
+Наследуется от `Component<GalleryData>`
+
+**Поля:**
+- `catalogElement: HTMLElement` — контейнер для карточек
+
+**Методы:**
+- `set catalogItems(items: HTMLElement[])` — отрисовывает каталог
+
+---
+
+## Формы
+
+### Form<T>
+Базовый класс для всех форм.
+
+**Поля:**
+- `formEl: HTMLFormElement`
+- `submitButton: HTMLButtonElement`
+- `errorsEl: HTMLElement`
+
+**Методы:**
+- `set errors(value: string)` — отображает ошибку
+- `set valid(state: boolean)` — активирует/деактивирует кнопку
+- `reset()` — сбрасывает форму
+
+**События:**
+- `form:submit` — отправка формы
+
+---
+
+### OrderForm (форма заказа)
+Наследуется от `Form<OrderData>`
+
+**Поля:**
+- `paymentButtons: HTMLButtonElement[]` — кнопки «онлайн» и «при получении»
+- `addressInput: HTMLInputElement`
+
+**Методы:**
+- `set payment(value: string)` — выделяет активную кнопку (модификатор `button_alt-active`)
+- `get address(): string`
+
+**События:**
+- `order:payment-change` — выбор способа оплаты
+- `order:address-change` — ввод адреса
+- `order:next` — кнопка «Далее»
+
+---
+
+### ContactsForm (форма контактов)
+Наследуется от `Form<ContactsData>`
+
+**Поля:**
+- `emailInput: HTMLInputElement`
+- `phoneInput: HTMLInputElement`
+
+**Методы:**
+- `get email(): string`
+- `get phone(): string`
+
+**События:**
+- `contacts:email-change`
+- `contacts:phone-change`
+- `contacts:submit` — кнопка «Оплатить»
+
+---
+
+## Карточки товаров
+
+### CardData
+- `id: string`
+- `title: string`
+- `price: number | null`
+- `image?: string`
+- `category?: string`
+- `description?: string`
+
+### Card (базовый)
+Наследуется от `Component<CardData>`
+
+**Поля:**
+- `titleEl: HTMLElement`
+- `priceEl: HTMLElement`
+- `descriptionEl?: HTMLElement`
+
+**Методы:**
+- `set title(value: string)`
+- `set price(value: number | null)`
+- `set description(value: string)`
+
+---
+
+### CardCatalog (карточка в каталоге)
+Наследуется от `Card`
+
+**Поля:**
+- `categoryEl: HTMLElement`
+- `imageEl: HTMLImageElement`
+
+**Методы:**
+- `set category(value: string)` — устанавливает категорию и её цвет через categoryMap
+- `set image(value: {src: string, alt: string})` — устанавливает изображение
+
+**События:**
+- `card:select` — клик по карточке
+
+---
+
+### CardPreview (карточка в модалке)
+Наследуется от `Card`
+
+**Поля:**
+- `categoryEl: HTMLElement`
+- `imageEl: HTMLImageElement`
+- `buttonEl: HTMLButtonElement`
+
+**Методы:**
+- `set category(value: string)` — устанавливает категорию и её цвет через categoryMap
+- `set image(value: {src: string, alt: string})`
+- `set buttonText(value: string)` — «Купить» / «Удалить из корзины»
+- `set buttonDisabled(state: boolean)` — для товаров без цены
+
+**События:**
+- `card:add` — клик по «Купить»
+- `card:remove` — клик по «Удалить из корзины»
+
+---
+
+### CardBasket (карточка в корзине)
+Наследуется от `Card`
+
+**Поля:**
+- `indexEl: HTMLElement` — номер товара в списке
+- `deleteButton: HTMLButtonElement`
+
+**Методы:**
+- `set index(value: number)` — устанавливает порядковый номер
+
+**События:**
+- `basket:remove` — клик по кнопке удаления
+
+---
