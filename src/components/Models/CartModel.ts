@@ -3,8 +3,8 @@ import { IProduct } from "../../types";
 export class CartModel {
     private _items: IProduct[] = [];
 
-    constructor(initialItems: IProduct[] = []) {
-        this._items = initialItems;
+    constructor() {
+        this._items = [];
     }
     
     getItems(): IProduct[] {

@@ -352,11 +352,11 @@ export interface IOrderResponse {
 
 ## Модальное окно
 
-### ModalData
+### IModalData
 - `content: HTMLElement | HTMLElement[]` — контент внутри модалки
 
 ### Modal
-Наследуется от `Component<ModalData>`
+Наследуется от `Component<IModalData>`
 
 **Поля:**
 - `closeButton: HTMLButtonElement` — кнопка закрытия
@@ -367,19 +367,19 @@ export interface IOrderResponse {
 - `open()` — открывает модалку (добавляет класс `modal_active`)
 - `close()` — закрывает модалку (удаляет класс `modal_active`)
 
-**События:**
-- `modal:open`
-- `modal:close`
-
+**Конструктор:**
+```ts
+constructor(container: HTMLElement)
+```
 ---
 
 ## Шапка
 
-### HeaderData
+### IHeaderActions
 - `counter: number` — количество товаров в корзине
 
 ### Header
-Наследуется от `Component<HeaderData>`
+Наследуется от `Component<{ counter: number }>`
 
 **Поля:**
 - `basketButton: HTMLButtonElement` — кнопка открытия корзины
@@ -388,32 +388,33 @@ export interface IOrderResponse {
 **Методы:**
 - `set counter(value: number)` — обновляет счётчик
 
-**События:**
-- `basket:open` — клик по иконке корзины
-
+**Конструктор:**
+```ts
+constructor(container: HTMLElement, actions?: IHeaderActions)
+```
 ---
 
 ## Корзина
 
-### BasketData
-- `price: number` — общая стоимость
-- `content: HTMLElement` — список товаров
-
 ### Basket
-Наследуется от `Component<BasketData>`
+Наследуется от `Component<{ items: HTMLElement[]; total: number }>`
 
 **Поля:**
-- `contentEl: HTMLElement` — контейнер списка товаров
-- `priceEl: HTMLElement` — элемент общей суммы
-- `basketButton: HTMLButtonElement` — кнопка оформления
+- `listEl: HTMLElement` — контейнер списка товаров
+- `totalEl: HTMLElement` — элемент общей суммы
+- `buttonEl: HTMLButtonElement` — кнопка оформления
 
 **Методы:**
-- `set price(value: number)` — обновляет сумму
-- `set content(items: HTMLElement[])` — отрисовывает список товаров
+- `set total(value: number)` — обновляет сумму
+- `set items(items: HTMLElement[])` — отрисовывает список товаров
 
-**События:**
-- `basket:checkout` — клик по кнопке «Оформить»
+```
+```
 
+**Конструктор:**
+```ts
+constructor(container: HTMLElement, actions?: IBasketActions)
+```
 ---
 
 ## Каталог
@@ -422,144 +423,146 @@ export interface IOrderResponse {
 - `catalog: HTMLElement[]` — массив карточек товаров
 
 ### Gallery / Catalog
-Наследуется от `Component<GalleryData>`
+Наследуется от `Component<{ catalog: HTMLElement[] }>`
 
 **Поля:**
-- `catalogElement: HTMLElement` — контейнер для карточек
+- `galleryEl: HTMLElement` — контейнер для карточек
 
 **Методы:**
-- `set catalogItems(items: HTMLElement[])` — отрисовывает каталог
+- `set catalog(items: HTMLElement[])` — отрисовывает каталог
+
+**Конструктор:**
+```ts
+constructor(container: HTMLElement)
+```
 
 ---
 
 ## Формы
 
 ### Form<T>
-Базовый класс для всех форм.
+Базовый класс для всех форм. Наследуется от `Component<T>`.
 
 **Поля:**
-- `formEl: HTMLFormElement`
-- `submitButton: HTMLButtonElement`
-- `errorsEl: HTMLElement`
+- `submitButton: HTMLButtonElement` - кнопка отправки
+- `errorsEl: HTMLElement` -  элемент для отображения ошибок
 
 **Методы:**
 - `set errors(value: string)` — отображает ошибку
 - `set valid(state: boolean)` — активирует/деактивирует кнопку
-- `reset()` — сбрасывает форму
 
-**События:**
-- `form:submit` — отправка формы
-
+**Конструктор:**
+```ts
+constructor(container: HTMLFormElement, actions?: IFormActions)
+```
 ---
 
 ### OrderForm (форма заказа)
-Наследуется от `Form<OrderData>`
+Наследуется от `Form<{ payment: string; address: string }>`
 
 **Поля:**
 - `paymentButtons: HTMLButtonElement[]` — кнопки «онлайн» и «при получении»
-- `addressInput: HTMLInputElement`
+- `addressInput: HTMLInputElement` — поле ввода адреса
 
 **Методы:**
 - `set payment(value: string)` — выделяет активную кнопку (модификатор `button_alt-active`)
-- `get address(): string`
+- `get address(): string` — устанавливает значение поля адреса
+- 'togglePayment(payment: string)' — переключает активную кнопку оплаты
 
-**События:**
-- `order:payment-change` — выбор способа оплаты
-- `order:address-change` — ввод адреса
-- `order:next` — кнопка «Далее»
-
+**Конструктор:**
+```ts
+constructor(container: HTMLFormElement, actions?: IOrderFormActions)
+```
 ---
 
 ### ContactsForm (форма контактов)
-Наследуется от `Form<ContactsData>`
+Наследуется от `Form<{ email: string; phone: string }>`
 
 **Поля:**
-- `emailInput: HTMLInputElement`
-- `phoneInput: HTMLInputElement`
+- `emailInput: HTMLInputElement` — поле ввода email
+- `phoneInput: HTMLInputElement` — поле ввода телефона
 
 **Методы:**
-- `get email(): string`
-- `get phone(): string`
+- `set email(): string` — устанавливает значение email
+- `set phone(): string` — устанавливает значение телефона
 
-**События:**
-- `contacts:email-change`
-- `contacts:phone-change`
-- `contacts:submit` — кнопка «Оплатить»
-
+**Конструктор:**
+```ts
+constructor(container: HTMLFormElement, actions?: IContactsFormActions)
+```
 ---
 
 ## Карточки товаров
 
-### CardData
-- `id: string`
-- `title: string`
-- `price: number | null`
-- `image?: string`
-- `category?: string`
-- `description?: string`
-
 ### Card (базовый)
-Наследуется от `Component<CardData>`
+Абстрактный базовый класс для всех карточек товаров. Наследуется от `Component<T & { title: string; price: number | null }>`.
 
 **Поля:**
-- `titleEl: HTMLElement`
-- `priceEl: HTMLElement`
-- `descriptionEl?: HTMLElement`
+- `titleEl: HTMLElement` — элемент названия товара
+- `priceEl: HTMLElement` — элемент цены
 
 **Методы:**
-- `set title(value: string)`
-- `set price(value: number | null)`
-- `set description(value: string)`
+- `set title(value: string)`  — устанавливает название товара
+- `set price(value: number | null)` — устанавливает цену
 
+**Конструктор:**
+```ts
+constructor(container: HTMLElement)
+```
 ---
 
 ### CardCatalog (карточка в каталоге)
-Наследуется от `Card`
+Наследуется от `Card<TCardCatalog>`
 
 **Поля:**
-- `categoryEl: HTMLElement`
-- `imageEl: HTMLImageElement`
+- `categoryEl: HTMLElement` — элемент категории
+- `imageEl: HTMLImageElement` — элемент изображения
+
+**Методы:**
+- `set category(value: string)` — устанавливает категорию и её цвет через categoryMap
+- `set image(value: string)` — устанавливает изображение
+
+**Конструктор:**
+```ts
+constructor(container: HTMLElement, actions?: { onClick: () => void })
+```
+---
+
+### CardPreview (карточка в модалке)
+Наследуется от `Card<IProduct>`
+
+**Поля:**
+- `categoryEl: HTMLElement` — элемент категории
+- `imageEl: HTMLImageElement` — элемент изображения
+- `buttonEl: HTMLButtonElement` — кнопка действия
+- `descriptionEl: HTMLElement` — элемент описания
 
 **Методы:**
 - `set category(value: string)` — устанавливает категорию и её цвет через categoryMap
 - `set image(value: {src: string, alt: string})` — устанавливает изображение
-
-**События:**
-- `card:select` — клик по карточке
-
----
-
-### CardPreview (карточка в модалке)
-Наследуется от `Card`
-
-**Поля:**
-- `categoryEl: HTMLElement`
-- `imageEl: HTMLImageElement`
-- `buttonEl: HTMLButtonElement`
-
-**Методы:**
-- `set category(value: string)` — устанавливает категорию и её цвет через categoryMap
-- `set image(value: {src: string, alt: string})`
 - `set buttonText(value: string)` — «Купить» / «Удалить из корзины»
 - `set buttonDisabled(state: boolean)` — для товаров без цены
+- `set description(value: string)`  — устанавливает текст описания
 
-**События:**
-- `card:add` — клик по «Купить»
-- `card:remove` — клик по «Удалить из корзины»
+**Конструктор:**
+```ts
+constructor(container: HTMLElement, actions?: { onAdd: () => void })
+```
 
 ---
 
 ### CardBasket (карточка в корзине)
-Наследуется от `Card`
+Наследуется от `Card<TCardBasket>`, где `TCardBasket = Pick<IProduct, 'title' | 'price'> & { index: number }`
 
 **Поля:**
 - `indexEl: HTMLElement` — номер товара в списке
-- `deleteButton: HTMLButtonElement`
+- `deleteButton: HTMLButtonElement`  — кнопка удаления 
 
 **Методы:**
 - `set index(value: number)` — устанавливает порядковый номер
 
-**События:**
-- `basket:remove` — клик по кнопке удаления
-
+**Конструктор:**
+```ts
+constructor(container: HTMLElement, actions?: { onClick: () => void })
+```
 ---

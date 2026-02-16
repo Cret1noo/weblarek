@@ -15,3 +15,4 @@ export class ShopApi {
         return this.api.post<IOrderResponse>('/order/', orderData);
     }
 }
+

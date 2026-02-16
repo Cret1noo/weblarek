@@ -6,7 +6,7 @@ export class Gallery extends Component<{ catalog: HTMLElement[] }> {
 
     constructor(container: HTMLElement) {
         super(container);
-        this.galleryEl = ensureElement<HTMLElement>('.gallery', container);
+         this.galleryEl = container; 
     }
 
     set catalog(items: HTMLElement[]) {

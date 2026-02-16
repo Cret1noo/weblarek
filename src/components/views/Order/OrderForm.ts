@@ -20,7 +20,6 @@ export class OrderForm extends Form<{ payment: string; address: string }> {
         this.paymentButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const paymentMethod = button.getAttribute('name') || 'card';
-                this.togglePayment(paymentMethod);
                 if (actions?.onPaymentChange) {
                     actions.onPaymentChange(paymentMethod);
                 }
