@@ -12,8 +12,8 @@ export class Header extends Component<{ counter: number }> {
     constructor(container: HTMLElement, actions?: IHeaderActions) {
         super(container);
 
-        this.basketButton = ensureElement<HTMLButtonElement>('.header__basket-counter', container);
-        this.counterEl = ensureElement<HTMLElement>('.header__counter', container);
+        this.basketButton = ensureElement<HTMLButtonElement>('.header__basket', container);
+        this.counterEl = ensureElement<HTMLElement>('.header__basket-counter', container);
 
         if (actions?.onBasketClick) {
             this.basketButton.addEventListener('click', actions.onBasketClick);
