@@ -7,6 +7,7 @@ import { BuyerModel } from './components/Models/BuyerModel';
 import { API_URL, CDN_URL } from './utils/constants';
 import { EventEmitter } from './components/base/Events';
 import { cloneTemplate, ensureElement } from './utils/utils';
+import { IOrderData } from './types';
 
 import { CardCatalog } from './components/views/Card/CardCatalog';
 import { CardPreview } from './components/views/Card/CardPreview';
@@ -17,6 +18,7 @@ import { Gallery } from './components/views/Gallery';
 import { Header } from './components/views/Header';
 import { OrderForm } from './components/views/Order/OrderForm';
 import { ContactsForm } from './components/views/Order/ContactsForm';
+import { Success } from './components/views/Success';
 
 // Создаем брокер событий
 const events = new EventEmitter();
@@ -25,7 +27,7 @@ const events = new EventEmitter();
 const api = new Api(API_URL);
 const shopApi = new ShopApi(api);
 
-// Создаем модели (БЕЗ параметров)
+// Создаем модели
 const productModel = new ProductModel(events);
 const cartModel = new CartModel(events);
 const buyerModel = new BuyerModel(events);
@@ -55,13 +57,9 @@ const basket = new Basket(cloneTemplate('#basket'), {
     onCheckout: () => events.emit('basket:checkout')
 });
 
-// Флаг для отслеживания открыта ли корзина
-let isBasketOpen = false;
-
+// Загрузка товаров
 shopApi.getProducts()
-    .then(data => {
-        productModel.saveProducts(data);
-    })
+    .then(data => productModel.saveProducts(data))
     .catch(err => console.error('Ошибка загрузки товаров:', err));
 
 
@@ -82,58 +80,10 @@ events.on('catalog:changed', () => {
     gallery.catalog = cards;
 });
 
-// Изменение корзины
+// Изменение корзины – только обновляем данные в компоненте корзины и счётчик
 events.on('basket:changed', () => {
     header.counter = cartModel.getItemsCount();
-    if (isBasketOpen) {
-        updateBasketView();
-    }
-});
-
-// Изменение выбранного товара
-events.on('product:changed', () => {
-    const product = productModel.getSelectedProduct();
-    if (!product) return;
-
-    const preview = new CardPreview(
-        cloneTemplate('#card-preview'),
-        {
-            onAdd: () => events.emit('basket:add', product)
-        }
-    );
-    preview.title = product.title;
-    preview.price = product.price;
-    preview.category = product.category;
-    preview.image = product.image;
-    preview.description = product.description;
-    
-    const inBasket = cartModel.containsItem(product.id);
-    preview.buttonText = inBasket ? 'Удалить из корзины' : 'Купить';
-    preview.buttonDisabled = product.price === null;
-
-    modal.content = preview.render();
-    modal.open();
-});
-
-// Выбор карточки
-events.on('card:select', (product: any) => {
-    productModel.saveSelectedProduct(product);
-});
-
-// Добавление/удаление из корзины
-events.on('basket:add', (product: any) => {
-    if (cartModel.containsItem(product.id)) {
-        cartModel.removeItem(product.id);
-    } else {
-        cartModel.addItem(product);
-    }
-    modal.close();
-});
-
-// Функция обновления корзины
-function updateBasketView() {
     const items = cartModel.getItems();
-    
     if (items.length === 0) {
         const emptyEl = document.createElement('p');
         emptyEl.textContent = 'Корзина пуста';
@@ -153,29 +103,64 @@ function updateBasketView() {
         basket.items = cards;
         basket.total = cartModel.getTotalAmount();
     }
-    modal.content = basket.render();
-}
+});
 
-// Открытие корзины
+// Открытие корзины – показываем уже актуальный basket
 events.on('basket:open', () => {
-    isBasketOpen = true;
-    updateBasketView();
+    modal.content = basket.render();
     modal.open();
 });
 
-// Удаление из корзины
+// Выбор карточки товара
+events.on('card:select', (product: any) => {
+    productModel.saveSelectedProduct(product);
+});
+
+// Изменение выбранного товара – показываем превью
+events.on('product:changed', () => {
+    const product = productModel.getSelectedProduct();
+    if (!product) return;
+
+    const preview = new CardPreview(
+        cloneTemplate('#card-preview'),
+        { onAdd: () => events.emit('basket:add', product) }
+    );
+    preview.title = product.title;
+    preview.price = product.price;
+    preview.category = product.category;
+    preview.image = product.image;
+    preview.description = product.description;
+    
+    const inBasket = cartModel.containsItem(product.id);
+    preview.buttonText = inBasket ? 'Удалить из корзины' : 'Купить';
+    preview.buttonDisabled = product.price === null;
+
+    modal.content = preview.render();
+    modal.open();
+});
+
+// Добавление/удаление товара через кнопку в превью
+events.on('basket:add', (product: any) => {
+    if (cartModel.containsItem(product.id)) {
+        cartModel.removeItem(product.id);
+    } else {
+        cartModel.addItem(product);
+    }
+    modal.close(); 
+});
+
+// Удаление из корзины (кнопка в корзине)
 events.on('basket:remove', (product: any) => {
     cartModel.removeItem(product.id);
 });
 
-// Оформление заказа
+// Переход к оформлению заказа (из корзины)
 events.on('basket:checkout', () => {
-    isBasketOpen = false;
     modal.content = orderForm.render();
     modal.open();
 });
 
-// Переход к контактам
+// Переход ко второй форме
 events.on('order:next', () => {
     modal.content = contactsForm.render();
     modal.open();
@@ -184,7 +169,6 @@ events.on('order:next', () => {
 // Отправка заказа
 events.on('contacts:submit', () => {
     const buyerData = buyerModel.getData();
-    
     const orderData = {
         payment: buyerData.payment || '',
         address: buyerData.address || '',
@@ -192,30 +176,43 @@ events.on('contacts:submit', () => {
         phone: buyerData.phone || '',
         items: cartModel.getItems().map(item => item.id),
         total: cartModel.getTotalAmount()
-    };
+    } as IOrderData;
 
     shopApi.createOrder(orderData)
-        .then((response: { id: string; total: number }) => {
+        .then(response => {
             cartModel.clear();
             buyerModel.clear();
-            modal.close();
-            isBasketOpen = false;
-            
-            alert(`Заказ оформлен! Списано ${response.total} синапсов`);
+            const success = new Success(cloneTemplate('#success'), {
+                onClick: () => modal.close()
+            });
+            success.total = response.total;
+            modal.content = success.render();
         })
         .catch(err => console.error('Ошибка оформления заказа:', err));
 });
 
-// Закрытие модалки
-events.on('modal:close', () => {
-    isBasketOpen = false;
+events.on('buyer:changed', () => {
+    const errors = buyerModel.validate();
+
+    const orderErrors = {
+        payment: errors.payment,
+        address: errors.address
+    };
+    const orderHasErrors = !!(orderErrors.payment || orderErrors.address);
+    orderForm.setErrors(orderErrors);
+    orderForm.setButtonState(orderHasErrors);
+
+    const contactsErrors = {
+        email: errors.email,
+        phone: errors.phone
+    };
+    const contactsHasErrors = !!(contactsErrors.email || contactsErrors.phone);
+    contactsForm.setErrors(contactsErrors);
+    contactsForm.setButtonState(contactsHasErrors);
 });
 
-// Изменение данных в формах
 events.on('order:payment-change', (data: { payment: string }) => {
-    buyerModel.saveData({ 
-        payment: data.payment as 'card' | 'cash' 
-    });
+    buyerModel.saveData({ payment: data.payment as 'card' | 'cash' });
     orderForm.payment = data.payment;
 });
 

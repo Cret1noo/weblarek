@@ -12,10 +12,10 @@ export class CardPreview extends Card<IProduct> {
     constructor(container: HTMLElement, actions?: {onAdd: () => void}) {
         super(container);
 
-        this.descriptionEl = ensureElement('card__text', container);
-        this.buttonEl = ensureElement(`card__button`, container) as HTMLButtonElement;
-        this.categoryEl = ensureElement('card__category', container);
-        this.imageEl = ensureElement('card__image') as HTMLImageElement;
+        this.descriptionEl = ensureElement('.card__text', container);
+        this.buttonEl = ensureElement(`.card__button`, container) as HTMLButtonElement;
+        this.categoryEl = ensureElement('.card__category', container);
+        this.imageEl = ensureElement('.card__image') as HTMLImageElement;
 
         if(actions?.onAdd) {
             this.buttonEl.addEventListener('click', actions.onAdd);

@@ -10,12 +10,16 @@ interface IOrderFormActions {
 export class OrderForm extends Form<{ payment: string; address: string }> {
     protected paymentButtons: HTMLButtonElement[];
     protected addressInput: HTMLInputElement;
+    protected submitButton: HTMLButtonElement;
+    protected errorContainer: HTMLElement; 
 
     constructor(container: HTMLFormElement, actions?: IOrderFormActions) {
         super(container, actions);
 
         this.paymentButtons = Array.from(container.querySelectorAll('.button_alt'));
         this.addressInput = ensureElement<HTMLInputElement>('input[name="address"]', container);
+        this.submitButton = ensureElement<HTMLButtonElement>('button[type="submit"]', container);
+        this.errorContainer = ensureElement('.form__errors', container); 
 
         this.paymentButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -50,5 +54,22 @@ export class OrderForm extends Form<{ payment: string; address: string }> {
 
     set address(value: string) {
         this.addressInput.value = value;
+    }
+
+    // Метод для установки ошибок (по ключам)
+    setErrors(errors: { payment?: string; address?: string }) {
+        this.errorContainer.innerHTML = '';
+        const errorMessages = [];
+        if (errors.payment) errorMessages.push(errors.payment);
+        if (errors.address) errorMessages.push(errors.address);
+        if (errorMessages.length > 0) {
+            this.errorContainer.textContent = errorMessages.join(', ');
+        } else {
+            this.errorContainer.textContent = '';
+        }
+    }
+
+    setButtonState(disabled: boolean) {
+        this.submitButton.disabled = disabled;
     }
 }
